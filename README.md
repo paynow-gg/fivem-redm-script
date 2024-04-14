@@ -1,4 +1,4 @@
-# PayNow Plugin for FiveM / RedM
+# PayNow Script for FiveM / RedM
 
 The official PayNow addon seamlessly integrates with game servers for FiveM & RedM, facilitating in-game transactions and enhancing gameplay with secure and efficient financial interactions. This guide will help you set up the PayNow plugin on your server.
 
