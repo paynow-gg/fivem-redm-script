@@ -3,6 +3,7 @@ const axios = require('axios');
 
 class PayNowAPI {
     constructor() {
+        this.version = '0.0.2';
         this.url = 'https://api.paynow.gg/v1/';
 
         this.token = GetConvar('paynow.token', '');
@@ -14,11 +15,11 @@ class PayNowAPI {
     }
 
     initialize() {
-        if (this.checkToken(this.token)) {
-            this.log(`Initialized with interval of ${this.intervalTime} seconds.`)
-        }
+        if (!this.checkToken(this.token)) return;
 
-        this.startInterval();
+        this.log(`Initialized with interval of ${this.intervalTime} seconds.`)
+
+        this.serverLink();
     }
 
     checkToken() {
@@ -33,10 +34,34 @@ class PayNowAPI {
         return false;
     }
 
+    async serverLink() {
+        const result = await this.request('delivery/gameserver/link', 'POST', { platform: 'fivem', version: this.version, hostname: GetConvar('sv_hostname', 'Unknown') });
+
+        if (!result) return;
+
+        if (result.update_available) {
+            this.log(`^3An update is available for PayNow. Please update to version ${result.latest_version}.`);
+        }
+
+        if (result.previously_linked) {
+            this.log(`^3This token has been previously used on "${result.previously_linked?.host_name}", ensure you have removed this token from the previous server.`);
+        }
+
+        if (!result.gameserver) {
+            this.log(`^1PayNow API did not return a GameServer object, this may be a transient issue, please try again or contact support.`);
+
+            return;
+        }
+
+        this.log(`Server linked to PayNow API. Server ID: ${result.gameserver.id}`);
+
+        this.serverLinked = true;
+
+        this.startInterval();
+    }
+
     startInterval() {
         this.interval = setInterval(() => {
-            if (!this.checkToken()) return;
-
             this.handlePendingCommands();
         }, this.intervalTime * 1000);
     }
