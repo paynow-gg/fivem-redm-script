@@ -3,7 +3,7 @@ const axios = require('axios');
 
 class PayNowAPI {
     constructor() {
-        this.version = '0.0.2';
+        this.version = '0.0.3';
         this.url = 'https://api.paynow.gg/v1/';
 
         this.token = GetConvar('paynow.token', '');
@@ -35,7 +35,12 @@ class PayNowAPI {
     }
 
     async serverLink() {
-        const result = await this.request('delivery/gameserver/link', 'POST', { platform: 'fivem', version: this.version, hostname: GetConvar('sv_hostname', 'Unknown') });
+        const result = await this.request('delivery/gameserver/link', 'POST', {
+            platform: 'fivem',
+            version: this.version,
+            hostname: GetConvar('sv_hostname', 'Unknown'),
+            ip: GetConvar('paynow.ip', '0.0.0.0')
+        });
 
         if (!result) return;
 
@@ -164,6 +169,8 @@ class PayNowAPI {
             return result.data;
         } catch (error) {
             this.log(`Request failed: ${error.message}`);
+
+            console.error(error.response?.data || error);
 
             return null;
         }

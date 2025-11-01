@@ -26,6 +26,18 @@ Replace `<token>` with your actual PayNow token.
 
 To permanently set this, add `set paynow.token <token>` to your `server.cfg`
 
+### Setting Your Server IP
+
+To show your server's IP in the PayNow portal, you can set it using:
+
+```plaintext
+set paynow.ip <ip>
+```
+
+Replace `<ip>` with your actual server's IP.
+
+To permanently set this, add `set paynow.token <token>` to your `server.cfg`
+
 ### Adjusting Fetch Interval
 
 The default fetch interval is recommended for most servers, but you can adjust it to meet your specific needs by using the command `set paynow.interval <interval>`, with interval being in seconds.
