@@ -75,8 +75,6 @@ class PayNowAPI {
     async handlePendingCommands() {
         const result = await this.request('delivery/command-queue/', 'POST', { steam_ids: this.getPlayerSteamIDs() });
 
-        console.log(result);
-
         if (!result?.length) return;
 
         this.log(`Handling ${result.length} pending commands.`);
