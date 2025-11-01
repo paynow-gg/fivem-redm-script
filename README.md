@@ -36,7 +36,7 @@ set paynow.ip <ip>
 
 Replace `<ip>` with your actual server's IP.
 
-To permanently set this, add `set paynow.token <token>` to your `server.cfg`
+To permanently set this, add `set paynow.ip <ip>` to your `server.cfg`
 
 ### Adjusting Fetch Interval
 
