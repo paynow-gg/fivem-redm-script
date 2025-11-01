@@ -1,13 +1,14 @@
 const hexToDecimal = require('../util/hexToDecimal');
+const decimalToHex = require('../util/decimalToHex');
 const axios = require('axios');
 
 class PayNowAPI {
     constructor() {
-        this.version = '0.0.3';
+        this.version = '0.0.4';
         this.url = 'https://api.paynow.gg/v1/';
 
         this.token = GetConvar('paynow.token', '');
-        this.intervalTime = GetConvarInt('paynow.interval', 15);
+        this.intervalTime = GetConvarInt('paynow.interval', 2);
         this.interval = null;
         this.executedCommands = [];
 
@@ -74,6 +75,8 @@ class PayNowAPI {
     async handlePendingCommands() {
         const result = await this.request('delivery/command-queue/', 'POST', { steam_ids: this.getPlayerSteamIDs() });
 
+        console.log(result);
+
         if (!result?.length) return;
 
         this.log(`Handling ${result.length} pending commands.`);
@@ -85,7 +88,37 @@ class PayNowAPI {
                 if (!this.isPlayerOnline(command.steam_id)) continue;
             }
 
-            ExecuteCommand(command.command);
+            const playerSourceRegex = /\{player\.source_from:(\d+)\}/g;
+            
+            const commandString = command.command;
+            
+            const result = commandString.replace(playerSourceRegex, (match, steamID) => {
+                const steamIDLong = parseInt(steamID, 10);
+
+                const steamHex = decimalToHex(steamIDLong);
+
+                if (!steamHex) return -1;
+
+                const players = getPlayers();
+
+                for (const player of players) {
+                    const identifiers = getPlayerIdentifiers(player);
+
+                    for (const identifier of identifiers) {
+                        if (!identifier.includes('steam')) continue;
+
+                        const playerSteamID = hexToDecimal(identifier.replace('steam:', ''));
+
+                        if (playerSteamID === steamIDLong) {
+                            return player;
+                        }
+                    }
+                }
+
+                return -1;
+            });
+
+            ExecuteCommand(result);
 
             this.executedCommands.push(command.attempt_id);
         }
@@ -142,7 +175,7 @@ class PayNowAPI {
 
                 const steamIDLong = hexToDecimal(identifier.replace('steam:', ''));
 
-                steamIDs.push(steamIDLong);
+                if (steamIDLong) steamIDs.push(steamIDLong);
 
                 break;
             }
